@@ -16,13 +16,13 @@ Preview the site:
 mint dev
 ```
 
-View your local preview at `http://localhost:3000`.
+The CLI prints the preview URL when the server starts.
 
 ## Source of truth
 
-The API contract is based on `docs/reference/archive-order-openapi.yaml`, copied from the Archive Order application repository.
+The API contract is based on `docs/reference/archive-order-openapi.yaml`.
 
-When backend behavior changes, update the OpenAPI document first and then update the guide and reference pages that explain the workflow.
+When API behavior changes, update the OpenAPI document first and then update the guide and reference pages that explain the workflow.
 
 ## Publishing
 

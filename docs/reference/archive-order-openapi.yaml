@@ -11,8 +11,7 @@ info:
   description: |
     REST API for Archive Order API clients.
 
-    The API is exposed by the `archive_order_api_http` Firebase HTTPS function
-    and is served from dedicated API subdomains.
+    The API is served from dedicated Archive Order API domains.
 
     Mutating requests support idempotency through the `Idempotency-Key` header.
 servers:
@@ -20,8 +19,6 @@ servers:
     description: Production
   - url: https://api-dev.archiveorder.com
     description: Development
-  - url: http://localhost:5174/archive-order/v1
-    description: Local Vite dev server through the existing Firebase Hosting rewrite
 security:
   - bearerApiKey: []
 tags:
@@ -568,7 +565,7 @@ components:
           example: Archives de Paris
         archiveRepositoryName:
           type: string
-          description: Deprecated alias accepted by the backend. Prefer `repositoryName`.
+          description: Deprecated alias accepted by the API. Prefer `repositoryName`.
           example: Archives de Paris
         archiveRepositoryId:
           type: string
@@ -617,7 +614,7 @@ components:
           example: Please retrieve a full-page scan if available.
         notes:
           type: string
-          description: Deprecated alias accepted by the backend. Prefer `instructions`.
+          description: Deprecated alias accepted by the API. Prefer `instructions`.
       additionalProperties: true
     PersonOfInterest:
       type: object

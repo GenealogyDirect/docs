@@ -23,10 +23,10 @@
 - Use sentence case for headings.
 - Code format endpoint paths, parameters, header names, commands, and field names.
 - Prefer concrete request and response examples over conceptual prose.
-- Do not document internal Firebase callable APIs as public API features.
+- Do not document private application APIs as public API features.
 
 ## Content boundaries
 
 - Document the public REST API, OpenAPI contract, webhook delivery, authentication, errors, and workflows.
-- Do not document internal admin tooling, private Firestore collections, or staff-only fulfillment operations unless they affect public API behavior.
+- Do not document private admin tooling, data stores, or staff-only fulfillment operations unless they affect public API behavior.
 - If a feature is not production-ready, state the limitation clearly.

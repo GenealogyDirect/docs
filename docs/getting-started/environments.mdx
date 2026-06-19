@@ -1,6 +1,6 @@
 ---
 title: "Environments"
-description: "Base URLs, local development, and request conventions."
+description: "Base URLs and request conventions."
 ---
 
 Archive Order exposes separate production and development API hosts.
@@ -9,21 +9,14 @@ Archive Order exposes separate production and development API hosts.
 | --- | --- | --- |
 | Production | `https://api.archiveorder.com` | Live customer orders and production payments. |
 | Development | `https://api-dev.archiveorder.com` | Integration testing and sandbox data. |
-| Local | `http://localhost:5174/archive-order/v1` | Local frontend and Firebase Hosting rewrite testing. |
 
 ## Path format
 
-Production and development API hosts expose resources at the root:
+API hosts expose resources at the root:
 
 ```text
 https://api.archiveorder.com/orders
 https://api-dev.archiveorder.com/orders
-```
-
-The local Vite development server includes the `/archive-order/v1` prefix:
-
-```text
-http://localhost:5174/archive-order/v1/orders
 ```
 
 ## Headers
@@ -56,6 +49,6 @@ Content-Type: application/json
 - Currency fields use three-letter ISO currency codes such as `EUR` or `USD`.
 - Payment amount fields ending in `Minor` are integer minor units, such as cents.
 
-## Current deployment note
+## Sandbox access
 
-The API documentation describes the intended public REST contract. If you receive a platform-level 404 or CORS failure in a non-production environment, confirm with GenealogyDirect that the Archive Order Firebase Functions have been deployed to that environment.
+Use the development environment for integration testing. Sandbox data, API keys, webhook endpoints, and payment behavior are separate from production.
