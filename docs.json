@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "ArchiveOrder API",
   "colors": {
-    "primary": "#2563EB",
-    "light": "#0EA5E9",
-    "dark": "#1D4ED8"
+    "primary": "#FF7A00",
+    "light": "#FFB000",
+    "dark": "#FF3D00"
   },
   "favicon": "/favicon.svg",
   "navigation": {
