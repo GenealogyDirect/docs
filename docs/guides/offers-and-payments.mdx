@@ -1,0 +1,103 @@
+---
+title: "Offers and payments"
+description: "Review researcher offers, select fulfillment, and initiate payment."
+---
+
+After an order is opened for fulfillment, researchers may submit offers.
+
+## List offers
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/orders/order_123/offers" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+Example response:
+
+```json
+[
+  {
+    "id": "offer_123",
+    "amount": 37.5,
+    "currency": "EUR",
+    "message": "I can retrieve this within 10 business days.",
+    "researcherId": "researcher_123",
+    "researcherName": "Camille Bernard",
+    "estimatedCompletionDate": "2026-07-15",
+    "status": "ACTIVE"
+  }
+]
+```
+
+## Select an offer
+
+```bash
+curl -X POST "$ARCHIVE_ORDER_BASE_URL/orders/order_123/offers/offer_123/select" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Idempotency-Key: $(uuidgen)"
+```
+
+The response includes whether payment is required:
+
+```json
+{
+  "id": "offer_123",
+  "status": "selected",
+  "paymentRequired": true
+}
+```
+
+## Decline an offer
+
+```bash
+curl -X POST "$ARCHIVE_ORDER_BASE_URL/orders/order_123/offers/offer_123/decline" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Idempotency-Key: $(uuidgen)"
+```
+
+## Initiate payment
+
+```bash
+curl -X POST "$ARCHIVE_ORDER_BASE_URL/orders/order_123/payments/initiate" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{
+    "offerId": "offer_123"
+  }'
+```
+
+Example response:
+
+```json
+{
+  "success": true,
+  "bidId": "offer_123",
+  "amountMinor": 4250,
+  "transferAmountMinor": 3750,
+  "platformFeeMinor": 500,
+  "currency": "EUR",
+  "clientSecret": "pi_123_secret_abc",
+  "paymentIntentId": "pi_123",
+  "publishableKey": "pk_live_123"
+}
+```
+
+## Finalize payment
+
+After your client confirms payment with the payment provider, finalize the payment:
+
+```bash
+curl -X POST "$ARCHIVE_ORDER_BASE_URL/orders/order_123/payments/finalize" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{
+    "offerId": "offer_123",
+    "paymentIntentId": "pi_123"
+  }'
+```
+
+<Warning>
+  Payment behavior is integration-dependent while production payment flows are being finalized. Confirm the expected payment confirmation flow for your API client before taking live payments.
+</Warning>

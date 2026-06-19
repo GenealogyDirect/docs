@@ -1,11 +1,11 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mintlify Starter Kit",
+  "name": "Archive Order API",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#2563EB",
+    "light": "#0EA5E9",
+    "dark": "#1D4ED8"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -14,24 +14,44 @@
         "group": "Getting Started",
         "pages": [
           "index",
-          "quickstart"
+          "docs/getting-started/quickstart",
+          "docs/getting-started/authentication",
+          "docs/getting-started/environments"
+        ]
+      },
+      {
+        "group": "Guides",
+        "pages": [
+          "docs/guides/order-lifecycle",
+          "docs/guides/create-an-order",
+          "docs/guides/offers-and-payments",
+          "docs/guides/messages-documents-events",
+          "docs/guides/webhooks"
+        ]
+      },
+      {
+        "group": "API Reference",
+        "pages": [
+          "docs/reference/overview",
+          "docs/reference/orders",
+          "docs/reference/offers",
+          "docs/reference/payments",
+          "docs/reference/messages",
+          "docs/reference/documents-and-events",
+          "docs/reference/webhook-endpoints",
+          "docs/reference/errors",
+          "docs/reference/schemas",
+          "docs/reference/openapi"
+        ]
+      },
+      {
+        "group": "Resources",
+        "pages": [
+          "docs/resources/testing",
+          "docs/resources/changelog"
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
     "light": "/logo/light.svg",
@@ -41,13 +61,13 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:support@genealogydirect.com"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://app.mintlify.com"
+      "label": "API status",
+      "href": "mailto:support@genealogydirect.com"
     }
   },
   "contextual": {
@@ -64,9 +84,7 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/GenealogyDirect"
     }
   }
 }

@@ -1,0 +1,79 @@
+---
+title: "Webhooks"
+description: "Receive Archive Order event deliveries at your HTTPS endpoint."
+---
+
+Webhooks let your integration react to Archive Order events without polling.
+
+## Create an endpoint
+
+```bash
+curl -X POST "$ARCHIVE_ORDER_BASE_URL/webhook-endpoints" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{
+    "url": "https://example.com/archive-order/webhook"
+  }'
+```
+
+Example response:
+
+```json
+{
+  "id": "whend_123",
+  "signingSecret": "2a18bb7d996643728aa0cc77162f9efb"
+}
+```
+
+Store the `signingSecret` securely. It is used to verify webhook signatures.
+
+## Signature verification
+
+Archive Order sends a signature header:
+
+```http
+X-ArchiveOrder-Signature: sha256=5b1c...
+```
+
+The signature is an HMAC-SHA256 digest computed with the endpoint signing secret over the sorted JSON request body.
+
+Your handler should:
+
+1. Read the raw JSON body.
+2. Recreate the canonical sorted JSON body expected by your integration.
+3. Compute HMAC-SHA256 with the endpoint signing secret.
+4. Compare the expected value to the `sha256=<hex digest>` header value using a constant-time comparison.
+5. Return any `2xx` status after successful processing.
+
+## Example event
+
+```json
+{
+  "type": "order.created",
+  "data": {
+    "id": "order_123"
+  }
+}
+```
+
+## List endpoints
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/webhook-endpoints" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+## Delete an endpoint
+
+```bash
+curl -X DELETE "$ARCHIVE_ORDER_BASE_URL/webhook-endpoints/whend_123" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Idempotency-Key: $(uuidgen)"
+```
+
+Deletion marks the endpoint as deleted. It does not remove historical delivery records.
+
+<Warning>
+  Webhook event coverage is being expanded. Validate the exact events emitted in your development environment before relying on webhooks as your only synchronization mechanism.
+</Warning>

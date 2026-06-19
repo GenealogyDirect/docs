@@ -1,0 +1,50 @@
+---
+title: "Messages"
+description: "List and create order messages."
+---
+
+## `GET /orders/{orderId}/messages`
+
+Lists messages for an order.
+
+Required scope: `orders:read`
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/orders/order_123/messages" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+Response:
+
+```json
+[
+  {
+    "id": "msg_123",
+    "content": "I found the register and will upload the scan shortly.",
+    "senderId": "client_123",
+    "timestamp": "2026-06-18T12:00:00Z"
+  }
+]
+```
+
+## `POST /orders/{orderId}/messages`
+
+Sends a message on an order.
+
+Required scope: `orders:write`
+
+Request body:
+
+```json
+{
+  "content": "Could you confirm whether the archive holds the 1892 register?"
+}
+```
+
+Response:
+
+```json
+{
+  "id": "msg_123"
+}
+```

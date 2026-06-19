@@ -1,0 +1,54 @@
+---
+title: "Authentication"
+description: "Authenticate requests with scoped bearer API keys."
+---
+
+Archive Order uses bearer API keys for server-to-server integrations.
+
+Send the API key in the `Authorization` header:
+
+```http
+Authorization: Bearer ao_live_your_key
+```
+
+## API key handling
+
+Treat API keys like passwords:
+
+- Store keys in a secret manager.
+- Never ship keys in browser or mobile client code.
+- Rotate keys if they are exposed.
+- Use separate keys for development and production.
+
+## Scopes
+
+API clients are issued explicit scopes. A request fails if the key is missing the required scope.
+
+| Scope | Allows |
+| --- | --- |
+| `orders:read` | List orders, read order details, list offers, messages, documents, and events. |
+| `orders:write` | Create orders, withdraw orders, select or decline offers, initiate or finalize payments, and send messages. |
+| `webhooks:read` | List webhook endpoints. |
+| `webhooks:write` | Create and delete webhook endpoints. |
+
+<Note>
+  Scope names should be treated as part of the public contract, but your account may not have every scope enabled by default.
+</Note>
+
+## Ownership
+
+API keys are tied to an API client. An API client can only access orders, offers, payments, messages, documents, events, and webhook endpoints that belong to that client.
+
+If a valid key tries to access a resource owned by another client, the API returns an authorization error.
+
+## Failed authentication
+
+Authentication and authorization failures return an error response:
+
+```json
+{
+  "error": "Authorization bearer token is required"
+}
+```
+
+Use the HTTP status code and `error` message for logging. Do not rely on exact error strings for application branching unless GenealogyDirect documents that string as stable.

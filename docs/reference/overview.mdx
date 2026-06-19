@@ -1,0 +1,50 @@
+---
+title: "Reference overview"
+description: "Request conventions, endpoints, and API-wide behavior."
+---
+
+The Archive Order API is a JSON REST API.
+
+## Base URLs
+
+| Environment | Base URL |
+| --- | --- |
+| Production | `https://api.archiveorder.com` |
+| Development | `https://api-dev.archiveorder.com` |
+| Local | `http://localhost:5174/archive-order/v1` |
+
+## Authentication
+
+All endpoints require:
+
+```http
+Authorization: Bearer <api_key>
+```
+
+## Idempotency
+
+Mutating endpoints support `Idempotency-Key`.
+
+Use idempotency keys for:
+
+- `POST /orders`
+- `POST /orders/{orderId}/withdraw`
+- `POST /orders/{orderId}/offers/{offerId}/select`
+- `POST /orders/{orderId}/offers/{offerId}/decline`
+- `POST /orders/{orderId}/payments/initiate`
+- `POST /orders/{orderId}/payments/finalize`
+- `POST /orders/{orderId}/messages`
+- `POST /webhook-endpoints`
+- `DELETE /webhook-endpoints/{endpointId}`
+
+## Endpoint groups
+
+| Group | Endpoints |
+| --- | --- |
+| Orders | Create, list, inspect, and withdraw archive document orders. |
+| Offers | List, select, and decline researcher offers. |
+| Payments | Initiate, inspect, and finalize offer payments. |
+| Messages | Exchange order-specific messages. |
+| Documents | Retrieve delivered documents. |
+| Events | Read order event history. |
+| Webhook endpoints | Register and manage webhook delivery targets. |

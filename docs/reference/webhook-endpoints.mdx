@@ -1,0 +1,75 @@
+---
+title: "Webhook endpoints"
+description: "Create, list, and delete webhook endpoints."
+---
+
+## `GET /webhook-endpoints`
+
+Lists webhook endpoints configured for the API client.
+
+Required scope: `webhooks:read`
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/webhook-endpoints" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+Response:
+
+```json
+[
+  {
+    "id": "whend_123",
+    "url": "https://example.com/archive-order/webhook",
+    "status": "active",
+    "createdAt": "2026-06-18T12:00:00Z",
+    "updatedAt": "2026-06-18T12:00:00Z"
+  }
+]
+```
+
+## `POST /webhook-endpoints`
+
+Creates a webhook endpoint.
+
+Required scope: `webhooks:write`
+
+Request body:
+
+```json
+{
+  "url": "https://example.com/archive-order/webhook",
+  "signingSecret": "optional-caller-supplied-secret"
+}
+```
+
+If `signingSecret` is omitted, the API generates one.
+
+Response:
+
+```json
+{
+  "id": "whend_123",
+  "signingSecret": "2a18bb7d996643728aa0cc77162f9efb"
+}
+```
+
+## `DELETE /webhook-endpoints/{endpointId}`
+
+Marks a webhook endpoint as deleted.
+
+Required scope: `webhooks:write`
+
+```bash
+curl -X DELETE "$ARCHIVE_ORDER_BASE_URL/webhook-endpoints/whend_123" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Idempotency-Key: $(uuidgen)"
+```
+
+Response:
+
+```json
+{
+  "success": true
+}
+```

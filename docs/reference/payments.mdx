@@ -1,0 +1,88 @@
+---
+title: "Payments"
+description: "Initiate, inspect, and finalize payments for accepted offers."
+---
+
+## `POST /orders/{orderId}/payments/initiate`
+
+Initiates payment for an offer.
+
+Required scope: `orders:write`
+
+Request body:
+
+```json
+{
+  "offerId": "offer_123"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "bidId": "offer_123",
+  "researcherStripeAccountId": "acct_123",
+  "amountMinor": 4250,
+  "transferAmountMinor": 3750,
+  "platformFeeMinor": 500,
+  "currency": "EUR",
+  "clientSecret": "pi_123_secret_abc",
+  "paymentIntentId": "pi_123",
+  "publishableKey": "pk_live_123"
+}
+```
+
+## `GET /orders/{orderId}/payments/{paymentIntentId}`
+
+Returns the payment snapshot stored on the order.
+
+Required scope: `orders:read`
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/orders/order_123/payments/pi_123" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+Response:
+
+```json
+{
+  "orderId": "order_123",
+  "payment": {
+    "status": "authorized",
+    "paymentIntentId": "pi_123",
+    "amount": 4250,
+    "currency": "EUR",
+    "platformFee": 500,
+    "transferAmount": 3750
+  }
+}
+```
+
+## `POST /orders/{orderId}/payments/finalize`
+
+Finalizes payment for an accepted offer.
+
+Required scope: `orders:write`
+
+Request body:
+
+```json
+{
+  "offerId": "offer_123",
+  "paymentIntentId": "pi_123"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "requestId": "order_123",
+  "bidId": "offer_123",
+  "idempotent": false
+}
+```

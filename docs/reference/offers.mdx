@@ -1,0 +1,75 @@
+---
+title: "Offers"
+description: "List, select, and decline researcher offers."
+---
+
+## `GET /orders/{orderId}/offers`
+
+Lists offers submitted for an order.
+
+Required scope: `orders:read`
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/orders/order_123/offers" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+Response:
+
+```json
+[
+  {
+    "id": "offer_123",
+    "amount": 37.5,
+    "currency": "EUR",
+    "message": "I can retrieve this within 10 business days.",
+    "researcherId": "researcher_123",
+    "researcherName": "Camille Bernard",
+    "estimatedCompletionDate": "2026-07-15",
+    "status": "ACTIVE"
+  }
+]
+```
+
+## `POST /orders/{orderId}/offers/{offerId}/select`
+
+Selects an offer for fulfillment.
+
+Required scope: `orders:write`
+
+```bash
+curl -X POST "$ARCHIVE_ORDER_BASE_URL/orders/order_123/offers/offer_123/select" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Idempotency-Key: $(uuidgen)"
+```
+
+Response:
+
+```json
+{
+  "id": "offer_123",
+  "status": "selected",
+  "paymentRequired": true
+}
+```
+
+## `POST /orders/{orderId}/offers/{offerId}/decline`
+
+Declines an offer.
+
+Required scope: `orders:write`
+
+```bash
+curl -X POST "$ARCHIVE_ORDER_BASE_URL/orders/order_123/offers/offer_123/decline" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Idempotency-Key: $(uuidgen)"
+```
+
+Response:
+
+```json
+{
+  "id": "offer_123",
+  "status": "declined"
+}
+```

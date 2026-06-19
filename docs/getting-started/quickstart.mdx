@@ -1,0 +1,112 @@
+---
+title: "Quickstart"
+description: "Create your first Archive Order API request."
+---
+
+This guide shows the fastest path from credentials to a submitted order.
+
+## Prerequisites
+
+You need:
+
+- An Archive Order API key.
+- The `orders:write` scope to create orders.
+- The `orders:read` scope to read the created order.
+- A client that can make HTTPS requests.
+
+## 1. Choose an environment
+
+Use the development environment while integrating:
+
+```bash
+export ARCHIVE_ORDER_BASE_URL="https://api-dev.archiveorder.com"
+export ARCHIVE_ORDER_API_KEY="ao_test_your_key"
+```
+
+Use production only after GenealogyDirect enables your production API client:
+
+```bash
+export ARCHIVE_ORDER_BASE_URL="https://api.archiveorder.com"
+export ARCHIVE_ORDER_API_KEY="ao_live_your_key"
+```
+
+## 2. Create an order
+
+```bash
+curl -X POST "$ARCHIVE_ORDER_BASE_URL/orders" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{
+    "repositoryName": "Archives de Paris",
+    "archiveRepositoryId": "FR-AD75",
+    "countryISOA3": "FRA",
+    "documentType": "Birth record",
+    "location": "Paris, France",
+    "pricingMode": "OPEN_FOR_BIDS",
+    "personsOfInterest": [
+      {
+        "firstname": "Marie",
+        "lastname": "Dupont"
+      }
+    ],
+    "instructions": "Please retrieve a full-page scan if available.",
+    "externalOrderRef": "case-2026-001"
+  }'
+```
+
+The response contains the public order ID and current status:
+
+```json
+{
+  "id": "order_123",
+  "status": "submitted",
+  "order": {
+    "repositoryName": "Archives de Paris",
+    "documentType": "Birth record",
+    "location": "Paris, France"
+  }
+}
+```
+
+## 3. Read the order
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/orders/order_123" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+## 4. Poll for offers
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/orders/order_123/offers" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+When offers are available, select one and continue with payment:
+
+```bash
+curl -X POST "$ARCHIVE_ORDER_BASE_URL/orders/order_123/offers/offer_123/select" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Idempotency-Key: $(uuidgen)"
+```
+
+## 5. Register webhooks
+
+Polling works for early integration. Production integrations should register a webhook endpoint:
+
+```bash
+curl -X POST "$ARCHIVE_ORDER_BASE_URL/webhook-endpoints" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{
+    "url": "https://example.com/archive-order/webhook"
+  }'
+```
+
+Store the returned `signingSecret`. You need it to verify webhook signatures.
+
+<Tip>
+  Use a stable `Idempotency-Key` when retrying the same mutating request after a timeout or network failure.
+</Tip>

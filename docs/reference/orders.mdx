@@ -1,0 +1,94 @@
+---
+title: "Orders"
+description: "Create, list, inspect, and withdraw orders."
+---
+
+## `GET /orders`
+
+Lists orders owned by the API client.
+
+Required scope: `orders:read`
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/orders" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+Response:
+
+```json
+[
+  {
+    "id": "order_123",
+    "status": "submitted",
+    "order": {}
+  }
+]
+```
+
+## `POST /orders`
+
+Creates an order.
+
+Required scope: `orders:write`
+
+Request body:
+
+| Field | Required | Type |
+| --- | --- | --- |
+| `repositoryName` | Yes | string |
+| `documentType` | Yes | string |
+| `location` | Yes | string |
+| `archiveRepositoryId` | No | string |
+| `countryISOA3` | No | string |
+| `pricingMode` | No | `FIXED` or `OPEN_FOR_BIDS` |
+| `fixedPrice` | No | number |
+| `currency` | No | string |
+| `externalOrderRef` | No | string |
+| `customerName` | No | string |
+| `personsOfInterest` | No | array |
+| `instructions` | No | string |
+
+```bash
+curl -X POST "$ARCHIVE_ORDER_BASE_URL/orders" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{
+    "repositoryName": "Archives de Paris",
+    "documentType": "Birth record",
+    "location": "Paris, France"
+  }'
+```
+
+## `GET /orders/{orderId}`
+
+Gets one order by ID.
+
+Required scope: `orders:read`
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/orders/order_123" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+## `POST /orders/{orderId}/withdraw`
+
+Withdraws an order before fulfillment work starts.
+
+Required scope: `orders:write`
+
+```bash
+curl -X POST "$ARCHIVE_ORDER_BASE_URL/orders/order_123/withdraw" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Idempotency-Key: $(uuidgen)"
+```
+
+Response:
+
+```json
+{
+  "id": "order_123",
+  "status": "withdrawn"
+}
+```

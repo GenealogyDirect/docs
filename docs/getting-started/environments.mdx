@@ -1,0 +1,61 @@
+---
+title: "Environments"
+description: "Base URLs, local development, and request conventions."
+---
+
+Archive Order exposes separate production and development API hosts.
+
+| Environment | Base URL | Use for |
+| --- | --- | --- |
+| Production | `https://api.archiveorder.com` | Live customer orders and production payments. |
+| Development | `https://api-dev.archiveorder.com` | Integration testing and sandbox data. |
+| Local | `http://localhost:5174/archive-order/v1` | Local frontend and Firebase Hosting rewrite testing. |
+
+## Path format
+
+Production and development API hosts expose resources at the root:
+
+```text
+https://api.archiveorder.com/orders
+https://api-dev.archiveorder.com/orders
+```
+
+The local Vite development server includes the `/archive-order/v1` prefix:
+
+```text
+http://localhost:5174/archive-order/v1/orders
+```
+
+## Headers
+
+Most requests use these headers:
+
+```http
+Authorization: Bearer <api_key>
+Content-Type: application/json
+```
+
+Mutating requests should also include:
+
+```http
+Idempotency-Key: 4f3d4d79-0c2d-4ad8-a62b-77b0b9db0aa1
+```
+
+## Content type
+
+Request and response bodies are JSON.
+
+```http
+Content-Type: application/json
+```
+
+## Dates and currencies
+
+- Date-only fields use ISO 8601 dates such as `2026-07-15`.
+- Timestamps use ISO 8601 date-time strings.
+- Currency fields use three-letter ISO currency codes such as `EUR` or `USD`.
+- Payment amount fields ending in `Minor` are integer minor units, such as cents.
+
+## Current deployment note
+
+The API documentation describes the intended public REST contract. If you receive a platform-level 404 or CORS failure in a non-production environment, confirm with GenealogyDirect that the Archive Order Firebase Functions have been deployed to that environment.

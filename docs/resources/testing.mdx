@@ -1,0 +1,51 @@
+---
+title: "Testing"
+description: "Practical checks for API integrations."
+---
+
+## Smoke test authentication
+
+Without an API key, protected endpoints should return `403`:
+
+```bash
+curl -i https://api-dev.archiveorder.com/orders
+```
+
+Expected body:
+
+```json
+{
+  "error": "Authorization bearer token is required"
+}
+```
+
+## Test idempotency
+
+Send the same create-order request twice with the same `Idempotency-Key`. The API should not create a duplicate order.
+
+```bash
+export IDEMPOTENCY_KEY="$(uuidgen)"
+```
+
+```bash
+curl -X POST "$ARCHIVE_ORDER_BASE_URL/orders" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $IDEMPOTENCY_KEY" \
+  -d '{
+    "repositoryName": "Archives de Paris",
+    "documentType": "Birth record",
+    "location": "Paris, France"
+  }'
+```
+
+Repeat the same command with the same key.
+
+## Test webhooks
+
+Use a development HTTPS endpoint that preserves request headers and raw body. Verify:
+
+- The endpoint receives `X-ArchiveOrder-Signature`.
+- Your handler rejects requests with a missing or invalid signature.
+- Your handler returns a `2xx` response after successful processing.
+- Replayed payloads do not create duplicate downstream side effects.

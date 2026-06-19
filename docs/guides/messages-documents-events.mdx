@@ -1,0 +1,77 @@
+---
+title: "Messages, documents, and events"
+description: "Communicate about an order and read fulfillment output."
+---
+
+Use order child resources to track fulfillment without exposing internal operations.
+
+## Messages
+
+List messages:
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/orders/order_123/messages" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+Send a message:
+
+```bash
+curl -X POST "$ARCHIVE_ORDER_BASE_URL/orders/order_123/messages" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{
+    "content": "Could you confirm whether the archive holds the 1892 register?"
+  }'
+```
+
+Messages are scoped to a single order.
+
+## Documents
+
+List delivered documents:
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/orders/order_123/documents" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+Example response:
+
+```json
+[
+  {
+    "name": "birth-record.pdf",
+    "url": "https://storage.example.com/signed-url"
+  }
+]
+```
+
+The `url` is a short-lived signed URL. Generate a fresh document list request when a URL expires.
+
+## Events
+
+List public event history:
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/orders/order_123/events" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+Example response:
+
+```json
+[
+  {
+    "id": "evt_123",
+    "type": "order.created",
+    "payload": {
+      "id": "order_123"
+    },
+    "createdAt": "2026-06-18T12:00:00Z"
+  }
+]
+```
+
+Use events for audit trails and reconciliation. Use webhooks for push delivery.

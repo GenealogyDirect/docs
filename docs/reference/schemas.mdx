@@ -1,0 +1,78 @@
+---
+title: "Schemas"
+description: "Primary request and response models."
+---
+
+This page summarizes the primary schemas. Use the OpenAPI document for the complete machine-readable contract.
+
+## `CreateOrderRequest`
+
+| Field | Type | Required |
+| --- | --- | --- |
+| `repositoryName` | string | Yes |
+| `documentType` | string | Yes |
+| `location` | string | Yes |
+| `archiveRepositoryId` | string | No |
+| `countryISOA3` | string | No |
+| `pricingMode` | `FIXED` or `OPEN_FOR_BIDS` | No |
+| `fixedPrice` | number | No |
+| `currency` | string | No |
+| `externalOrderRef` | string | No |
+| `customerName` | string | No |
+| `personsOfInterest` | `PersonOfInterest[]` | No |
+| `instructions` | string | No |
+
+## `ArchiveOrder`
+
+| Field | Type |
+| --- | --- |
+| `id` | string |
+| `status` | `OrderStatus` |
+| `order` | object |
+
+## `OrderStatus`
+
+```text
+submitted
+open_for_offers
+offers_received
+offer_selected
+payment_required
+paid
+assigned
+in_progress
+delivered
+closed
+withdrawn
+expired
+cancelled
+unfulfillable
+refunded
+```
+
+## `Offer`
+
+| Field | Type |
+| --- | --- |
+| `id` | string |
+| `amount` | number |
+| `currency` | string |
+| `message` | string |
+| `researcherId` | string |
+| `researcherName` | string |
+| `estimatedCompletionDate` | date |
+| `status` | string |
+
+## `DeliveryDocument`
+
+| Field | Type |
+| --- | --- |
+| `name` | string |
+| `url` | URI |
+
+## `WebhookEvent`
+
+| Field | Type |
+| --- | --- |
+| `type` | string |
+| `data` | object |

@@ -1,0 +1,55 @@
+---
+title: "Order lifecycle"
+description: "Understand public statuses and the normal Archive Order workflow."
+---
+
+An order represents a request to retrieve an archival document from a repository.
+
+## Statuses
+
+| Status | Meaning |
+| --- | --- |
+| `submitted` | The order was accepted by the API. |
+| `open_for_offers` | Researchers can review the order and submit offers. |
+| `offers_received` | One or more offers are available. |
+| `offer_selected` | You selected an offer. |
+| `payment_required` | Payment must be initiated or completed before fulfillment continues. |
+| `paid` | Payment has been accepted or authorized. |
+| `assigned` | The order is assigned for fulfillment. |
+| `in_progress` | Fulfillment work has started. |
+| `delivered` | One or more delivery documents are available. |
+| `closed` | The order is complete. |
+| `withdrawn` | The client withdrew the order before fulfillment work started. |
+| `expired` | The order or offer window expired. |
+| `cancelled` | The order was cancelled. |
+| `unfulfillable` | The order cannot be fulfilled. |
+| `refunded` | A payment was refunded. |
+
+## Normal flow
+
+```text
+submitted
+open_for_offers
+offers_received
+offer_selected
+payment_required
+paid
+assigned
+in_progress
+delivered
+closed
+```
+
+Not every order visits every status. Fixed-price orders and account-specific workflows may skip offer or payment states.
+
+## Withdrawal
+
+Use `POST /orders/{orderId}/withdraw` when a customer no longer wants the document.
+
+Withdrawals are only allowed before fulfillment work starts. Once the order is assigned or in progress, contact support.
+
+## Delivered documents
+
+`GET /orders/{orderId}/documents` returns an empty array until the order reaches `delivered`.
+
+Document URLs are signed URLs and expire after a short period. Fetch and store the file promptly if your integration needs long-term access.

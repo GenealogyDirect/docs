@@ -1,0 +1,66 @@
+---
+title: "Create an order"
+description: "Build high-quality order requests for archival document retrieval."
+---
+
+Create orders with `POST /orders`.
+
+## Required fields
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `repositoryName` | string | Name of the archive, repository, courthouse, or record office. |
+| `documentType` | string | Type of document requested. |
+| `location` | string | Place, jurisdiction, or repository location. |
+
+## Recommended fields
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `archiveRepositoryId` | string | Stable repository identifier from your system or a known archival registry. |
+| `countryISOA3` | string | Three-letter country code. |
+| `personsOfInterest` | array | People connected to the requested record. |
+| `instructions` | string | Research notes, date ranges, register details, or scan requirements. |
+| `externalOrderRef` | string | Your case, cart, project, or customer order ID. |
+| `pricingMode` | string | `OPEN_FOR_BIDS` or `FIXED`. |
+| `fixedPrice` | number | Price when using fixed-price ordering. |
+| `currency` | string | Three-letter currency code. |
+
+## Example
+
+```json
+{
+  "repositoryName": "Archives de Paris",
+  "archiveRepositoryId": "FR-AD75",
+  "countryISOA3": "FRA",
+  "documentType": "Birth record",
+  "location": "Paris, France",
+  "pricingMode": "OPEN_FOR_BIDS",
+  "externalOrderRef": "case-2026-001",
+  "customerName": "Alex Martin",
+  "personsOfInterest": [
+    {
+      "firstname": "Marie",
+      "lastname": "Dupont"
+    }
+  ],
+  "instructions": "Please retrieve a full-page scan if available. Target year is 1892."
+}
+```
+
+## Deprecated aliases
+
+The backend accepts these compatibility aliases:
+
+| Deprecated field | Preferred field |
+| --- | --- |
+| `archiveRepositoryName` | `repositoryName` |
+| `notes` | `instructions` |
+
+Use the preferred fields in new integrations.
+
+## Idempotency
+
+Order creation supports the `Idempotency-Key` header.
+
+If a request times out after the API receives it, retry the same request with the same idempotency key. The API can return the original result instead of creating a duplicate order.

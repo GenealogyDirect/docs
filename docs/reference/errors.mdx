@@ -1,0 +1,41 @@
+---
+title: "Errors"
+description: "Error response format and common status codes."
+---
+
+Errors return JSON with an `error` string.
+
+```json
+{
+  "error": "Order not found"
+}
+```
+
+## Status codes
+
+| Status | Meaning |
+| --- | --- |
+| `400` | The request body, path parameter, or operation state is invalid. |
+| `403` | Authentication, authorization, ownership, or scope check failed. |
+| `404` | The route or resource was not found. |
+| `500` | An unexpected Archive Order request failure occurred. |
+
+## Client recommendations
+
+- Log the HTTP method, path, status code, and `error` value.
+- Avoid exposing raw error strings directly to end users.
+- Retry network failures and safe `5xx` cases with the same `Idempotency-Key` for mutating requests.
+- Do not retry `400`, `403`, or `404` without changing the request or credentials.
+
+## Example
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/orders/missing_order" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+```json
+{
+  "error": "Order not found"
+}
+```

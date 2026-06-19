@@ -1,0 +1,55 @@
+---
+title: "Documents and events"
+description: "Retrieve delivery documents and order event history."
+---
+
+## `GET /orders/{orderId}/documents`
+
+Lists delivered documents.
+
+Required scope: `orders:read`
+
+Returns an empty array until the order reaches `delivered`.
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/orders/order_123/documents" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+Response:
+
+```json
+[
+  {
+    "name": "birth-record.pdf",
+    "url": "https://storage.example.com/signed-url"
+  }
+]
+```
+
+## `GET /orders/{orderId}/events`
+
+Lists public order events sorted by creation time.
+
+Required scope: `orders:read`
+
+```bash
+curl "$ARCHIVE_ORDER_BASE_URL/orders/order_123/events" \
+  -H "Authorization: Bearer $ARCHIVE_ORDER_API_KEY"
+```
+
+Response:
+
+```json
+[
+  {
+    "id": "evt_123",
+    "type": "order.created",
+    "payload": {
+      "id": "order_123"
+    },
+    "actor": {},
+    "createdAt": "2026-06-18T12:00:00Z"
+  }
+]
+```

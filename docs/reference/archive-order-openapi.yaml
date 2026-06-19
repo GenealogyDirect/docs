@@ -1,0 +1,1003 @@
+openapi: 3.1.0
+info:
+  title: Archive Order API
+  version: 0.1.0
+  contact:
+    name: GenealogyDirect, LLC
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+  x-owner: GenealogyDirect, LLC
+  description: |
+    REST API for Archive Order API clients.
+
+    The API is exposed by the `archive_order_api_http` Firebase HTTPS function
+    and is served from dedicated API subdomains.
+
+    Mutating requests support idempotency through the `Idempotency-Key` header.
+servers:
+  - url: https://api.archiveorder.com
+    description: Production
+  - url: https://api-dev.archiveorder.com
+    description: Development
+  - url: http://localhost:5174/archive-order/v1
+    description: Local Vite dev server through the existing Firebase Hosting rewrite
+security:
+  - bearerApiKey: []
+tags:
+  - name: Orders
+    description: Create, list, inspect, and withdraw archive document orders.
+  - name: Offers
+    description: Review, select, and decline researcher offers.
+  - name: Payments
+    description: Initiate, inspect, and finalize offer payments.
+  - name: Messages
+    description: Exchange order-specific messages.
+  - name: Documents
+    description: Retrieve delivered order documents.
+  - name: Events
+    description: Read order event history.
+  - name: Webhook Endpoints
+    description: Manage webhook delivery endpoints for API clients.
+paths:
+  /orders:
+    get:
+      tags:
+        - Orders
+      summary: List orders
+      description: Requires the `orders:read` scope.
+      operationId: listOrders
+      responses:
+        "200":
+          description: Orders owned by the API client.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ArchiveOrder"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      tags:
+        - Orders
+      summary: Create an order
+      description: Requires the `orders:write` scope.
+      operationId: createOrder
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+      responses:
+        "200":
+          description: Created order.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArchiveOrder"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /orders/{orderId}:
+    get:
+      tags:
+        - Orders
+      summary: Get an order
+      description: Requires the `orders:read` scope.
+      operationId: getOrder
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: Order details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArchiveOrder"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /orders/{orderId}/withdraw:
+    post:
+      tags:
+        - Orders
+      summary: Withdraw an order
+      description: Requires the `orders:write` scope. Orders can only be withdrawn before fulfillment work starts.
+      operationId: withdrawOrder
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "200":
+          description: Withdrawal result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderMutationResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /orders/{orderId}/offers:
+    get:
+      tags:
+        - Offers
+      summary: List offers for an order
+      description: Requires the `orders:read` scope.
+      operationId: listOffers
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: Offers submitted by researchers.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Offer"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /orders/{orderId}/offers/{offerId}/select:
+    post:
+      tags:
+        - Offers
+      summary: Select an offer
+      operationId: selectOffer
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+        - $ref: "#/components/parameters/OfferId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "200":
+          description: Selected offer result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SelectOfferResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /orders/{orderId}/offers/{offerId}/decline:
+    post:
+      tags:
+        - Offers
+      summary: Decline an offer
+      operationId: declineOffer
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+        - $ref: "#/components/parameters/OfferId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "200":
+          description: Declined offer result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfferMutationResult"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /orders/{orderId}/payments/initiate:
+    post:
+      tags:
+        - Payments
+      summary: Initiate payment for an offer
+      operationId: initiatePayment
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InitiatePaymentRequest"
+      responses:
+        "200":
+          description: Payment initiation data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InitiatePaymentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /orders/{orderId}/payments/{paymentIntentId}:
+    get:
+      tags:
+        - Payments
+      summary: Get payment snapshot
+      operationId: getPaymentSnapshot
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+        - name: paymentIntentId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: pi_123
+      responses:
+        "200":
+          description: Payment snapshot stored on the order.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentSnapshot"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /orders/{orderId}/payments/finalize:
+    post:
+      tags:
+        - Payments
+      summary: Finalize payment for an accepted offer
+      operationId: finalizePayment
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FinalizePaymentRequest"
+      responses:
+        "200":
+          description: Payment finalization result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinalizePaymentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /orders/{orderId}/messages:
+    get:
+      tags:
+        - Messages
+      summary: List order messages
+      operationId: listMessages
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: Messages sorted by timestamp.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OrderMessage"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      tags:
+        - Messages
+      summary: Send an order message
+      operationId: sendMessage
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageRequest"
+      responses:
+        "200":
+          description: Created message ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatedId"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /orders/{orderId}/documents:
+    get:
+      tags:
+        - Documents
+      summary: List delivered documents
+      description: Returns an empty array until the order reaches the `delivered` public status.
+      operationId: listDocuments
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: Signed delivery document URLs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DeliveryDocument"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /orders/{orderId}/events:
+    get:
+      tags:
+        - Events
+      summary: List order events
+      operationId: listEvents
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: Order event history sorted by creation time.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OrderEvent"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /webhook-endpoints:
+    get:
+      tags:
+        - Webhook Endpoints
+      summary: List webhook endpoints
+      operationId: listWebhookEndpoints
+      responses:
+        "200":
+          description: Configured webhook endpoints for the API client.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WebhookEndpoint"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      tags:
+        - Webhook Endpoints
+      summary: Create a webhook endpoint
+      operationId: createWebhookEndpoint
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWebhookEndpointRequest"
+      responses:
+        "200":
+          description: Created webhook endpoint credentials.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateWebhookEndpointResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /webhook-endpoints/{endpointId}:
+    delete:
+      tags:
+        - Webhook Endpoints
+      summary: Delete a webhook endpoint
+      description: Marks the endpoint as deleted.
+      operationId: deleteWebhookEndpoint
+      parameters:
+        - name: endpointId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: whend_123
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "200":
+          description: Deletion result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteWebhookEndpointResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+webhooks:
+  archiveOrderEvent:
+    post:
+      summary: Archive Order webhook delivery
+      operationId: receiveArchiveOrderWebhook
+      description: |
+        Archive Order sends JSON webhook events to active webhook endpoint URLs.
+        The `X-ArchiveOrder-Signature` header contains an HMAC-SHA256 signature
+        in the form `sha256=<hex digest>`, computed over the sorted JSON body
+        with the endpoint signing secret.
+      parameters:
+        - name: X-ArchiveOrder-Signature
+          in: header
+          required: true
+          schema:
+            type: string
+          example: sha256=5b1c...
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookEvent"
+      responses:
+        "200":
+          description: Return any 2xx status to acknowledge delivery.
+components:
+  securitySchemes:
+    bearerApiKey:
+      type: http
+      scheme: bearer
+      description: "API key presented as `Authorization: Bearer <api key>`."
+  parameters:
+    OrderId:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: string
+      example: order_123
+    OfferId:
+      name: offerId
+      in: path
+      required: true
+      schema:
+        type: string
+      example: offer_123
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Recommended for POST and DELETE requests to safely retry mutating operations.
+      schema:
+        type: string
+        maxLength: 255
+      example: 4f3d4d79-0c2d-4ad8-a62b-77b0b9db0aa1
+  responses:
+    BadRequest:
+      description: Invalid request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Authentication, authorization, ownership, or scope check failed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Route or resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalError:
+      description: Unexpected Archive Order request failure.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+      additionalProperties: false
+      example:
+        error: Order not found
+    CreateOrderRequest:
+      type: object
+      required:
+        - repositoryName
+        - documentType
+        - location
+      properties:
+        repositoryName:
+          type: string
+          minLength: 1
+          example: Archives de Paris
+        archiveRepositoryName:
+          type: string
+          description: Deprecated alias accepted by the backend. Prefer `repositoryName`.
+          example: Archives de Paris
+        archiveRepositoryId:
+          type: string
+          example: FR-AD75
+        countryISOA3:
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: FRA
+        documentType:
+          type: string
+          minLength: 1
+          example: Birth record
+        location:
+          type: string
+          minLength: 1
+          example: Paris, France
+        pricingMode:
+          type: string
+          enum:
+            - FIXED
+            - OPEN_FOR_BIDS
+          default: OPEN_FOR_BIDS
+        fixedPrice:
+          type: number
+          format: float
+          minimum: 0
+          example: 45
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: EUR
+        externalOrderRef:
+          type: string
+          example: EXT-12345
+        customerName:
+          type: string
+          example: Alex Martin
+        personsOfInterest:
+          type: array
+          items:
+            $ref: "#/components/schemas/PersonOfInterest"
+        instructions:
+          type: string
+          example: Please retrieve a full-page scan if available.
+        notes:
+          type: string
+          description: Deprecated alias accepted by the backend. Prefer `instructions`.
+      additionalProperties: true
+    PersonOfInterest:
+      type: object
+      properties:
+        firstname:
+          type: string
+          example: Marie
+        lastname:
+          type: string
+          example: Dupont
+      additionalProperties: true
+    ArchiveOrder:
+      type: object
+      required:
+        - id
+        - status
+        - order
+      properties:
+        id:
+          type: string
+          example: order_123
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+        order:
+          type: object
+          description: Normalized order data converted from the underlying fulfillment request.
+          additionalProperties: true
+      additionalProperties: false
+    OrderStatus:
+      type: string
+      enum:
+        - submitted
+        - open_for_offers
+        - offers_received
+        - offer_selected
+        - payment_required
+        - paid
+        - assigned
+        - in_progress
+        - delivered
+        - closed
+        - withdrawn
+        - expired
+        - cancelled
+        - unfulfillable
+        - refunded
+    OrderMutationResult:
+      type: object
+      required:
+        - id
+        - status
+      properties:
+        id:
+          type: string
+          example: order_123
+        status:
+          type: string
+          example: withdrawn
+      additionalProperties: true
+    Offer:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: offer_123
+        amount:
+          type: number
+          format: float
+          example: 37.5
+        currency:
+          type: string
+          example: EUR
+        message:
+          type: string
+          example: I can retrieve this within 10 business days.
+        researcherId:
+          type: string
+          example: researcher_123
+        researcherName:
+          type: string
+          example: Camille Bernard
+        estimatedCompletionDate:
+          type: string
+          format: date
+          example: 2026-07-15
+        status:
+          type: string
+          example: ACTIVE
+      additionalProperties: true
+    SelectOfferResponse:
+      type: object
+      required:
+        - id
+        - status
+        - paymentRequired
+      properties:
+        id:
+          type: string
+          example: offer_123
+        status:
+          type: string
+          example: selected
+        paymentRequired:
+          type: boolean
+          example: true
+      additionalProperties: true
+    OfferMutationResult:
+      type: object
+      required:
+        - id
+        - status
+      properties:
+        id:
+          type: string
+          example: offer_123
+        status:
+          type: string
+          example: declined
+      additionalProperties: true
+    InitiatePaymentRequest:
+      type: object
+      required:
+        - offerId
+      properties:
+        offerId:
+          type: string
+          example: offer_123
+      additionalProperties: false
+    InitiatePaymentResponse:
+      type: object
+      required:
+        - success
+        - bidId
+        - amountMinor
+        - transferAmountMinor
+        - platformFeeMinor
+        - currency
+        - clientSecret
+        - paymentIntentId
+        - publishableKey
+      properties:
+        success:
+          type: boolean
+          example: true
+        bidId:
+          type: string
+          example: offer_123
+        researcherStripeAccountId:
+          type: string
+          example: acct_123
+        amountMinor:
+          type: integer
+          example: 4250
+        transferAmountMinor:
+          type: integer
+          example: 3750
+        platformFeeMinor:
+          type: integer
+          example: 500
+        currency:
+          type: string
+          example: EUR
+        clientSecret:
+          type: string
+          example: pi_123_secret_abc
+        paymentIntentId:
+          type: string
+          example: pi_123
+        publishableKey:
+          type: string
+          example: pk_live_123
+      additionalProperties: true
+    PaymentSnapshot:
+      type: object
+      required:
+        - orderId
+        - payment
+      properties:
+        orderId:
+          type: string
+          example: order_123
+        payment:
+          type: object
+          additionalProperties: true
+          example:
+            status: authorized
+            paymentIntentId: pi_123
+            amount: 4250
+            currency: EUR
+            platformFee: 500
+            transferAmount: 3750
+      additionalProperties: false
+    FinalizePaymentRequest:
+      type: object
+      required:
+        - offerId
+        - paymentIntentId
+      properties:
+        offerId:
+          type: string
+          example: offer_123
+        paymentIntentId:
+          type: string
+          example: pi_123
+      additionalProperties: false
+    FinalizePaymentResponse:
+      type: object
+      required:
+        - success
+        - requestId
+        - bidId
+        - idempotent
+      properties:
+        success:
+          type: boolean
+          example: true
+        requestId:
+          type: string
+          example: order_123
+        bidId:
+          type: string
+          example: offer_123
+        idempotent:
+          type: boolean
+          example: false
+      additionalProperties: true
+    SendMessageRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 1
+          example: Could you confirm whether the archive holds the 1892 register?
+      additionalProperties: false
+    CreatedId:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: msg_123
+      additionalProperties: false
+    OrderMessage:
+      type: object
+      required:
+        - id
+        - content
+      properties:
+        id:
+          type: string
+          example: msg_123
+        content:
+          type: string
+          example: I found the register and will upload the scan shortly.
+        senderId:
+          type: string
+          example: client_123
+        timestamp:
+          type: string
+          format: date-time
+      additionalProperties: true
+    DeliveryDocument:
+      type: object
+      required:
+        - name
+        - url
+      properties:
+        name:
+          type: string
+          example: birth-record.pdf
+        url:
+          type: string
+          format: uri
+          description: Signed URL valid for approximately 15 minutes.
+      additionalProperties: false
+    OrderEvent:
+      type: object
+      required:
+        - id
+        - type
+      properties:
+        id:
+          type: string
+          example: evt_123
+        type:
+          type: string
+          example: order.created
+        payload:
+          type: object
+          additionalProperties: true
+        actor:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+      additionalProperties: true
+    CreateWebhookEndpointRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+          pattern: "^https://"
+          example: https://example.com/archive-order/webhook
+        signingSecret:
+          type: string
+          description: Optional caller-supplied HMAC secret. If omitted, the API generates one.
+          example: whsec_123
+      additionalProperties: false
+    CreateWebhookEndpointResponse:
+      type: object
+      required:
+        - id
+        - signingSecret
+      properties:
+        id:
+          type: string
+          example: whend_123
+        signingSecret:
+          type: string
+          example: 2a18bb7d996643728aa0cc77162f9efb
+      additionalProperties: false
+    WebhookEndpoint:
+      type: object
+      required:
+        - id
+        - url
+        - status
+      properties:
+        id:
+          type: string
+          example: whend_123
+        url:
+          type: string
+          format: uri
+          example: https://example.com/archive-order/webhook
+        signingSecret:
+          type: string
+          description: Endpoint HMAC signing secret.
+        status:
+          type: string
+          enum:
+            - active
+            - deleted
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      additionalProperties: true
+    DeleteWebhookEndpointResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          example: true
+      additionalProperties: false
+    WebhookEvent:
+      type: object
+      required:
+        - type
+        - data
+      properties:
+        type:
+          type: string
+          example: order.created
+        data:
+          type: object
+          additionalProperties: true
+          example:
+            id: order_123
+      additionalProperties: false
