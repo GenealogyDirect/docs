@@ -1,6 +1,6 @@
-# Archive Order API docs
+# ArchiveOrder API docs
 
-Mintlify documentation for the Archive Order API.
+Mintlify documentation for the ArchiveOrder API.
 
 ## Development
 

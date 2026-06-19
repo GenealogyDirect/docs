@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: Archive Order API
+  title: ArchiveOrder API
   version: 0.1.0
   contact:
     name: GenealogyDirect, LLC
@@ -9,9 +9,9 @@ info:
     identifier: LicenseRef-Proprietary
   x-owner: GenealogyDirect, LLC
   description: |
-    REST API for Archive Order API clients.
+    REST API for ArchiveOrder API clients.
 
-    The API is served from dedicated Archive Order API domains.
+    The API is served from dedicated ArchiveOrder API domains.
 
     Mutating requests support idempotency through the `Idempotency-Key` header.
 servers:
@@ -463,10 +463,10 @@ paths:
 webhooks:
   archiveOrderEvent:
     post:
-      summary: Archive Order webhook delivery
+      summary: ArchiveOrder webhook delivery
       operationId: receiveArchiveOrderWebhook
       description: |
-        Archive Order sends JSON webhook events to active webhook endpoint URLs.
+        ArchiveOrder sends JSON webhook events to active webhook endpoint URLs.
         The `X-ArchiveOrder-Signature` header contains an HMAC-SHA256 signature
         in the form `sha256=<hex digest>`, computed over the sorted JSON body
         with the endpoint signing secret.
@@ -536,7 +536,7 @@ components:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
     InternalError:
-      description: Unexpected Archive Order request failure.
+      description: Unexpected ArchiveOrder request failure.
       content:
         application/json:
           schema:

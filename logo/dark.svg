@@ -1,5 +1,5 @@
-<svg width="220" height="36" viewBox="0 0 220 36" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Archive Order API">
+<svg width="220" height="36" viewBox="0 0 220 36" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ArchiveOrder API">
   <rect x="1" y="1" width="34" height="34" rx="8" fill="#60A5FA"/>
   <path d="M10 25L17.7 9.5H20.3L28 25H24.8L23.2 21.5H14.8L13.2 25H10ZM16 18.8H22L19 12.3L16 18.8Z" fill="#0F172A"/>
-  <text x="46" y="23" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="18" font-weight="650" fill="#F8FAFC">Archive Order API</text>
+  <text x="46" y="23" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="18" font-weight="650" fill="#F8FAFC">ArchiveOrder API</text>
 </svg>

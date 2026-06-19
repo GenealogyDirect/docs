@@ -1,9 +1,9 @@
 ---
 title: "Webhooks"
-description: "Receive Archive Order event deliveries at your HTTPS endpoint."
+description: "Receive ArchiveOrder event deliveries at your HTTPS endpoint."
 ---
 
-Webhooks let your integration react to Archive Order events without polling.
+Webhooks let your integration react to ArchiveOrder events without polling.
 
 ## Create an endpoint
 
@@ -30,7 +30,7 @@ Store the `signingSecret` securely. It is used to verify webhook signatures.
 
 ## Signature verification
 
-Archive Order sends a signature header:
+ArchiveOrder sends a signature header:
 
 ```http
 X-ArchiveOrder-Signature: sha256=5b1c...

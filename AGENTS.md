@@ -2,7 +2,7 @@
 
 ## About this project
 
-- This is the Mintlify documentation site for the Archive Order API.
+- This is the Mintlify documentation site for the ArchiveOrder API.
 - Pages are MDX files with YAML frontmatter.
 - Configuration lives in `docs.json`.
 - Public documentation content lives under `docs/`.
